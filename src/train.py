@@ -72,39 +72,23 @@ X_test_scaled = scaler.transform(X_test)
 # Models
 # ==========================
 
-models = {
-    "Logistic Regression": LogisticRegression(
-        max_iter=1000,
-        random_state=42,
-    ),
+def get_models():
+    """
+    Returns all machine learning models used for training.
+    """
 
-    "Decision Tree": DecisionTreeClassifier(
-        random_state=42,
-    ),
+    models = {
+        "Logistic Regression": LogisticRegression(max_iter=1000),
+        "Decision Tree": DecisionTreeClassifier(random_state=42),
+        "Random Forest": RandomForestClassifier(random_state=42),
+        "Gradient Boosting": GradientBoostingClassifier(random_state=42),
+        "XGBoost": XGBClassifier(random_state=42),
+        "LightGBM": LGBMClassifier(random_state=42),
+        "CatBoost": CatBoostClassifier(verbose=0, random_state=42)
+    }
 
-    "Random Forest": RandomForestClassifier(
-        n_estimators=200,
-        random_state=42,
-    ),
-
-    "Gradient Boosting": GradientBoostingClassifier(
-        random_state=42,
-    ),
-
-    "XGBoost": XGBClassifier(
-        random_state=42,
-        eval_metric="logloss",
-    ),
-
-    "LightGBM": LGBMClassifier(
-        random_state=42,
-    ),
-
-    "CatBoost": CatBoostClassifier(
-        verbose=0,
-        random_state=42,
-    ),
-}
+    return models
+models = get_models()
 
 # ==========================
 # Train & Evaluate
