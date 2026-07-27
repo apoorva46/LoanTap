@@ -27,7 +27,6 @@ from sklearn.metrics import (
     classification_report,
 )
 
-
 # ==========================
 # Models
 # ==========================
@@ -38,33 +37,70 @@ def get_models():
     """
 
     return {
-        "Logistic Regression": LogisticRegression(max_iter=1000),
-        "Decision Tree": DecisionTreeClassifier(random_state=42),
-        "Random Forest": RandomForestClassifier(random_state=42),
-        "Gradient Boosting": GradientBoostingClassifier(random_state=42),
-        "XGBoost": XGBClassifier(random_state=42),
-        "LightGBM": LGBMClassifier(random_state=42),
-        "CatBoost": CatBoostClassifier(verbose=0, random_state=42),
+        "Logistic Regression": LogisticRegression(
+            max_iter=1000,
+        ),
+        "Decision Tree": DecisionTreeClassifier(
+            random_state=42,
+        ),
+        "Random Forest": RandomForestClassifier(
+            random_state=42,
+        ),
+        "Gradient Boosting": GradientBoostingClassifier(
+            random_state=42,
+        ),
+        "XGBoost": XGBClassifier(
+            random_state=42,
+        ),
+        "LightGBM": LGBMClassifier(
+            random_state=42,
+        ),
+        "CatBoost": CatBoostClassifier(
+            verbose=0,
+            random_state=42,
+        ),
     }
-
 
 # ==========================
 # Train & Evaluate
 # ==========================
 
-def evaluate_model(model, model_name, X_train, X_test, y_train, y_test):
+def evaluate_model(
+    model,
+    model_name,
+    X_train,
+    X_test,
+    X_train_scaled,
+    X_test_scaled,
+    y_train,
+    y_test,
+):
     """
-    Train and evaluate a model.
+    Train and evaluate a machine learning model.
     """
 
     print("=" * 70)
     print(f"Training : {model_name}")
 
-    model.fit(X_train, y_train)
+    # Scale only Logistic Regression
+    if model_name == "Logistic Regression":
+        train_data = X_train_scaled
+        test_data = X_test_scaled
+    else:
+        train_data = X_train
+        test_data = X_test
+    print(type(train_data))
+    print(type(y_train))
 
-    y_pred = model.predict(X_test)
-    y_prob = model.predict_proba(X_test)[:, 1]
 
+    # Train model
+    model.fit(train_data, y_train)
+
+    # Predictions
+    y_pred = model.predict(test_data)
+    y_prob = model.predict_proba(test_data)[:, 1]
+
+    # Metrics
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred)
     recall = recall_score(y_test, y_pred)
@@ -90,7 +126,6 @@ def evaluate_model(model, model_name, X_train, X_test, y_train, y_test):
 
     return model, metrics, auc
 
-
 # ==========================
 # Save Best Model
 # ==========================
@@ -115,8 +150,9 @@ def save_best_model(model, scaler, feature_columns):
         "models/feature_columns.pkl",
     )
 
-    print("\nBest Model Saved Successfully!")
-
+    print("\n" + "=" * 70)
+    print("Best Model Saved Successfully!")
+    print("=" * 70)
 
 # ==========================
 # Main Function
@@ -124,19 +160,32 @@ def save_best_model(model, scaler, feature_columns):
 
 def main():
 
+    # ==========================
     # Load Dataset
+    # ==========================
 
     df = pd.read_csv("data/LoanTap.csv")
 
     print(f"Dataset Shape : {df.shape}")
 
+    # ==========================
     # Preprocess Dataset
+    # ==========================
 
     X, y = preprocess_train(df)
 
+    print(X.select_dtypes(include=["datetime64[ns]"]).columns.tolist())
+
     print(f"Feature Matrix Shape : {X.shape}")
 
+    print("\nColumn Names:\n")
+    print(X.columns.tolist())
+
+    
+
+    # ==========================
     # Train Test Split
+    # ==========================
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -149,14 +198,27 @@ def main():
     print(f"Train Shape : {X_train.shape}")
     print(f"Test Shape  : {X_test.shape}")
 
+    print("\nX_train dtypes:")
+    print(X_train.dtypes.value_counts())
+
+    print("\nObject columns:")
+    print(X_train.select_dtypes(include=["object"]).columns.tolist())
+
+    print("\nDatetime columns:")
+    print(X_train.select_dtypes(include=["datetime64[ns]"]).columns.tolist())
+
+    # ==========================
     # Feature Scaling
+    # ==========================
 
     scaler = StandardScaler()
 
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
+    # ==========================
     # Models
+    # ==========================
 
     models = get_models()
 
@@ -166,15 +228,19 @@ def main():
     best_model = None
     best_model_name = ""
 
+    # ==========================
     # Train & Evaluate
+    # ==========================
 
     for name, model in models.items():
 
         trained_model, metrics, auc = evaluate_model(
             model=model,
             model_name=name,
-            X_train=X_train_scaled,
-            X_test=X_test_scaled,
+            X_train=X_train,
+            X_test=X_test,
+            X_train_scaled=X_train_scaled,
+            X_test_scaled=X_test_scaled,
             y_train=y_train,
             y_test=y_test,
         )
@@ -186,7 +252,9 @@ def main():
             best_model = trained_model
             best_model_name = name
 
+    # ==========================
     # Comparison Table
+    # ==========================
 
     results_df = pd.DataFrame(results)
 
@@ -202,7 +270,9 @@ def main():
 
     print(results_df)
 
+    # ==========================
     # Save Best Model
+    # ==========================
 
     print(f"\nBest Model : {best_model_name}")
     print(f"Best ROC-AUC : {best_auc:.4f}")
@@ -212,7 +282,6 @@ def main():
         scaler,
         X.columns.tolist(),
     )
-
 
 if __name__ == "__main__":
     main()

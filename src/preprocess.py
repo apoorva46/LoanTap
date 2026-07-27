@@ -61,10 +61,18 @@ def preprocess_train(df):
     for col in categorical_cols:
         df[col] = df[col].fillna(df[col].mode()[0])
 
-    # One-Hot Encoding
     X = pd.get_dummies(
         df.drop(columns="target"),
         drop_first=True,
+    )
+
+    # Clean column names for XGBoost
+    X.columns = (
+    X.columns.astype(str)
+    .str.strip()
+    .str.replace(r"[^\w]", "_", regex=True)
+    .str.replace(r"_+", "_", regex=True)
+    .str.strip("_")
     )
 
     y = df["target"]
@@ -93,4 +101,10 @@ def preprocess_predict(df):
         drop_first=True,
     )
 
-    return df
+    # Clean column names for XGBoost
+    df.columns = (
+        df.columns.astype(str)
+        .str.replace(r"[\[\]<>]", "_", regex=True)
+    )
+
+    return df   
