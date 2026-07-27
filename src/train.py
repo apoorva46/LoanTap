@@ -168,22 +168,36 @@ print(results_df)
 # Save Best Model
 # ==========================
 
+
 print("\nBest Model :", best_model_name)
 print(f"Best ROC-AUC : {best_auc:.4f}")
 
-joblib.dump(
+
+def save_best_model(model, scaler, feature_columns):
+    """
+    Save trained model and preprocessing artifacts.
+    """
+
+    joblib.dump(
+        model,
+        "models/loan_default_model.pkl",
+    )
+
+    joblib.dump(
+        scaler,
+        "models/scaler.pkl",
+    )
+
+    joblib.dump(
+        feature_columns,
+        "models/feature_columns.pkl",
+    )
+
+    print("\nBest Model Saved Successfully!")
+
+
+save_best_model(
     best_model,
-    "models/loan_default_model.pkl",
-)
-
-joblib.dump(
     scaler,
-    "models/scaler.pkl",
-)
-
-joblib.dump(
     X.columns.tolist(),
-    "models/feature_columns.pkl",
 )
-
-print("\nBest Model Saved Successfully!")
