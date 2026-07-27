@@ -5,11 +5,9 @@ from .preprocess import preprocess_predict
 
 
 # Load Saved Artifacts
-
 model = joblib.load("models/loan_default_model.pkl")
 scaler = joblib.load("models/scaler.pkl")
 feature_columns = joblib.load("models/feature_columns.pkl")
-
 
 def predict_loan(input_df):
     """
@@ -78,5 +76,5 @@ if __name__ == "__main__":
 
     result, probability = predict_loan(sample)
 
-    print(result)
-    print(probability)
+    print(f"Prediction: {result}")
+    print(f"Probability: {probability:.4f}")
