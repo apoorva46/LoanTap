@@ -5,10 +5,12 @@ from .preprocess import preprocess_predict
 
 
 # Load Saved Artifacts
-model = joblib.load("models/loan_default_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
-feature_columns = joblib.load("models/feature_columns.pkl")
-
+try:
+    model = joblib.load("models/loan_default_model.pkl")
+    scaler = joblib.load("models/scaler.pkl")
+    feature_columns = joblib.load("models/feature_columns.pkl")
+except Exception as e:
+    raise RuntimeError(f"Failed to load model artifacts: {e}")
 def predict_loan(input_df):
     """
     Predict loan repayment status.
