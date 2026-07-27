@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-
-from src.predict import predict_loan
+import requests
 
 st.set_page_config(
     page_title="Loan Default Prediction",
@@ -9,14 +8,34 @@ st.set_page_config(
     layout="wide",
 )
 
+# =========================
+# Sidebar
+# =========================
+
+with st.sidebar:
+
+    st.header("📌 Model Information")
+
+    st.markdown("""
+**Model:** CatBoost
+
+**Dataset:** 390K+ Loan Records
+
+**Metric:** ROC-AUC: 0.7233
+
+**Deployment:** Flask REST API + Docker + AWS ECS
+""")
+
+# =========================
+# Title
+# =========================
+
 st.title("🏦 Loan Default Prediction System")
 
-st.markdown(
-    """
+st.markdown("""
 Predict whether a loan applicant is likely to **Fully Pay** the loan
-or become **Charged Off** using a Logistic Regression model.
-"""
-)
+or become **Charged Off** using the deployed **CatBoost model**.
+""")
 
 st.divider()
 
@@ -53,15 +72,7 @@ with left:
 
     grade = st.selectbox(
         "Grade",
-        [
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-        ],
+        ["A","B","C","D","E","F","G"],
     )
 
     sub_grade = st.selectbox(
@@ -193,7 +204,7 @@ with right:
 
 st.divider()
 
-col1, col2, col3 = st.columns([2, 1, 2])
+col1, col2, col3 = st.columns([2,1,2])
 
 with col2:
 
@@ -202,73 +213,106 @@ with col2:
         use_container_width=True,
     )
 
-
 if predict:
 
     input_df = pd.DataFrame(
         {
-            "loan_amnt": [loan_amnt],
-            "term": [term],
-            "int_rate": [int_rate],
-            "installment": [installment],
-            "grade": [grade],
-            "sub_grade": [sub_grade],
-            "emp_length": [emp_length],
-            "home_ownership": [home_ownership],
-            "annual_inc": [annual_inc],
-            "verification_status": [verification_status],
-            "purpose": [purpose],
-            "dti": [dti],
-            "open_acc": [open_acc],
-            "pub_rec": [pub_rec],
-            "revol_bal": [revol_bal],
-            "revol_util": [revol_util],
-            "total_acc": [total_acc],
-            "mort_acc": [mort_acc],
-            "pub_rec_bankruptcies": [pub_rec_bankruptcies],
-            "application_type": [application_type],
+            "loan_amnt":[loan_amnt],
+            "term":[term],
+            "int_rate":[int_rate],
+            "installment":[installment],
+            "grade":[grade],
+            "sub_grade":[sub_grade],
+            "emp_length":[emp_length],
+            "home_ownership":[home_ownership],
+            "annual_inc":[annual_inc],
+            "verification_status":[verification_status],
+            "purpose":[purpose],
+            "dti":[dti],
+            "open_acc":[open_acc],
+            "pub_rec":[pub_rec],
+            "revol_bal":[revol_bal],
+            "revol_util":[revol_util],
+            "total_acc":[total_acc],
+            "mort_acc":[mort_acc],
+            "pub_rec_bankruptcies":[pub_rec_bankruptcies],
+            "application_type":[application_type],
         }
     )
 
-    prediction, probability = predict_loan(input_df)
+    with st.spinner("Predicting..."):
+
+        response = requests.post(
+            "http://127.0.0.1:5000/predict",
+            json=input_df.iloc[0].to_dict(),
+        )
+
+    if response.status_code != 200:
+
+        st.error("Prediction API failed.")
+        st.stop()
+
+    result = response.json()
+
+    prediction = result["prediction"]
+    probability = float(result["probability"])
 
     st.divider()
 
-    st.subheader("Prediction Result")
+    st.subheader("📊 Prediction Summary")
 
     if prediction == "Fully Paid":
 
-        st.success(
-            "✅ This applicant is likely to Fully Pay the loan."
-        )
+        st.success("✅ This applicant is likely to Fully Pay the loan.")
 
     else:
 
-        st.error(
-            "❌ This applicant is likely to be Charged Off."
-        )
+        st.error("❌ This applicant is likely to be Charged Off.")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
 
         st.metric(
             "Repayment Probability",
-            f"{probability * 100:.2f}%",
+            f"{probability*100:.2f}%"
         )
 
     with col2:
 
         st.metric(
             "Default Probability",
-            f"{(1 - probability) * 100:.2f}%",
+            f"{(1-probability)*100:.2f}%"
         )
+
+    with col3:
+
+        confidence = max(probability, 1-probability)
+
+        st.metric(
+            "Model Confidence",
+            f"{confidence*100:.2f}%"
+        )
+
+    st.progress(probability)
+
+    if probability >= 0.80:
+
+        st.success("🟢 Low Credit Risk")
+
+    elif probability >= 0.60:
+
+        st.warning("🟡 Medium Credit Risk")
+
+    else:
+
+        st.error("🔴 High Credit Risk")
 
     st.divider()
 
-    with st.expander("Applicant Details", expanded=False):
+    with st.expander("Applicant Details"):
 
         st.dataframe(
             input_df,
             use_container_width=True,
-        )    
+        )
