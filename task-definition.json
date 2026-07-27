@@ -1,0 +1,40 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "loantap-api",
+      "image": "613473203642.dkr.ecr.us-west-2.amazonaws.com/loantap-api:latest",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "hostPort": 5000,
+          "protocol": "tcp",
+          "name": "loantap-api-5000-tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "environmentFiles": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "ulimits": [],
+      "systemControls": []
+    }
+  ],
+  "family": "loantap-task",
+  "executionRoleArn": "arn:aws:iam::613473203642:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "placementConstraints": [],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "512",
+  "memory": "1024",
+  "enableFaultInjection": false
+}
