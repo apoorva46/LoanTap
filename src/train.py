@@ -89,9 +89,7 @@ def evaluate_model(
     else:
         train_data = X_train
         test_data = X_test
-    print(type(train_data))
-    print(type(y_train))
-
+    
 
     # Train model
     model.fit(train_data, y_train)
@@ -199,13 +197,10 @@ def main():
     print(f"Test Shape  : {X_test.shape}")
 
     print("\nX_train dtypes:")
-    print(X_train.dtypes.value_counts())
 
     print("\nObject columns:")
-    print(X_train.select_dtypes(include=["object"]).columns.tolist())
 
     print("\nDatetime columns:")
-    print(X_train.select_dtypes(include=["datetime64[ns]"]).columns.tolist())
 
     # ==========================
     # Feature Scaling
