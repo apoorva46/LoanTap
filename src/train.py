@@ -151,7 +151,7 @@ def save_best_model(model, scaler, feature_columns):
     print("\n" + "=" * 70)
     print("Best Model Saved Successfully!")
     print("=" * 70)
-
+    
 # ==========================
 # Main Function
 # ==========================
@@ -277,6 +277,76 @@ def main():
         scaler,
         X.columns.tolist(),
     )
+
+    # ==========================
+    # Feature Importance
+    # ==========================
+
+    import os
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import roc_curve, auc
+
+    os.makedirs("screenshots", exist_ok=True)
+
+    if hasattr(best_model, "feature_importances_"):
+
+        feature_importance = pd.DataFrame({
+            "Feature": X.columns,
+            "Importance": best_model.feature_importances_
+        })
+
+        feature_importance = feature_importance.sort_values(
+            by="Importance",
+            ascending=False
+        ).head(15)
+
+        plt.figure(figsize=(10,6))
+        plt.barh(
+            feature_importance["Feature"],
+            feature_importance["Importance"]
+        )
+        plt.gca().invert_yaxis()
+        plt.xlabel("Importance")
+        plt.title("Top 15 Feature Importance (CatBoost)")
+        plt.tight_layout()
+
+        plt.savefig(
+            "screenshots/feature-importance.png",
+            dpi=300
+        )
+
+        plt.close()
+
+    # ==========================
+    # ROC Curve
+    # ==========================
+
+    y_prob = best_model.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure(figsize=(6,6))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1],[0,1],"--")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Curve")
+    plt.legend(loc="lower right")
+    plt.grid(True)
+    plt.tight_layout()
+
+    plt.savefig(
+        "screenshots/roc-curve.png",
+        dpi=300
+    )
+
+    plt.close()
+
+    print("\nSaved:")
+    print("screenshots/feature-importance.png")
+    print("screenshots/roc-curve.png")
+
 
 if __name__ == "__main__":
     main()

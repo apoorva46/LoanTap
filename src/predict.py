@@ -11,6 +11,7 @@ try:
     feature_columns = joblib.load("models/feature_columns.pkl")
 except Exception as e:
     raise RuntimeError(f"Failed to load model artifacts: {e}")
+
 def predict_loan(input_df):
     """
     Predict loan repayment status.
