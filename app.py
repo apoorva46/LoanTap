@@ -9,8 +9,8 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return {
-        "application": "Loan Default Prediction API",
-        "version": "1.0.0",
+        "application": "Loan Default Prediction API - CI/CD Working",
+        "version": "2.0.0",
         "status": "Running"
     }
 
