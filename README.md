@@ -807,7 +807,7 @@ https://github.com/apoorva46
 
 LinkedIn
 
-(Add your LinkedIn profile here)
+https://www.linkedin.com/in/apoorva10/
 
 ---
 
@@ -815,7 +815,7 @@ LinkedIn
 
 Special thanks to:
 
-- LoanTap dataset contributors
+- LoanTap dataset contributors- Scaler Academy
 - Open-source Python community
 - Scikit-learn
 - CatBoost
