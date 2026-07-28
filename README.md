@@ -94,32 +94,24 @@ An intelligent machine learning system can assist credit analysts by identifying
 ```mermaid
 flowchart LR
 
+## Architecture
+
 ```mermaid
 flowchart LR
+    A["Loan Applicant Data"] --> B["Data Preprocessing"]
+    B --> C["Feature Engineering"]
+    C --> D["CatBoost Model"]
+    D --> E["Flask REST API"]
+    E --> F["Docker Container"]
+    F --> G["Amazon ECR"]
+    G --> H["Amazon ECS Fargate"]
 
-A["Loan Applicant Data"] --> B["Data Preprocessing"]
+    I["GitHub Repository"] --> J["GitHub Actions CI/CD"]
+    J --> G
 
-B --> C["Feature Engineering"]
-
-C --> D["CatBoost Model"]
-
-D --> E["Flask REST API"]
-
-E --> F["Docker Container"]
-
-F --> G["Amazon Elastic Container Registry (ECR)"]
-
-G --> H["Amazon ECS Fargate"]
-
-I["GitHub Repository"] --> J["GitHub Actions CI/CD"]
-
-J --> G
-
-H --> K["Streamlit Application"]
-
-H --> L["REST API Consumers"]
+    H --> K["Streamlit Application"]
+    H --> L["REST API Consumers"]
 ```
-
 ---
 
 # ⚙️ Tech Stack
