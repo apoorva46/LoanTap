@@ -91,9 +91,6 @@ An intelligent machine learning system can assist credit analysts by identifying
 
 # 🏗️ System Architecture
 
-```mermaid
-flowchart LR
-
 ## Architecture
 
 ```mermaid
